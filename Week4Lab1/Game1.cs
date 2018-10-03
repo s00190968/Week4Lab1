@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Sprites;
 
 namespace Week4Lab1
 {
@@ -11,7 +12,9 @@ namespace Week4Lab1
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
-
+        SimpleSprite background, redghost, blueghost, pac;
+        string colMsg = "";
+        SpriteFont msgFont;
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -40,7 +43,15 @@ namespace Week4Lab1
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
+            msgFont = Content.Load<SpriteFont>("colMsg");
+
             // TODO: use this.Content to load your game content here
+            Texture2D bg = Content.Load<Texture2D>(@"Sprites/download");
+            background = new SimpleSprite(bg, Vector2.Zero);
+            Texture2D rGhost = Content.Load<Texture2D>(@"Sprites/redghost");
+            redghost = new SimpleSprite(rGhost, Vector2.Zero);
+            Texture2D bGhost = Content.Load<Texture2D>(@"Sprites/blueghost");
+            blueghost = new SimpleSprite(bGhost, Vector2.Zero);
         }
 
         /// <summary>
@@ -59,11 +70,39 @@ namespace Week4Lab1
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
+            float speed = 5f;
+            Vector2 previousPos = redghost.Position;
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            // TODO: Add your update logic here
-
+            if (Keyboard.GetState().IsKeyDown(Keys.A))//move right
+            {
+                redghost.Move(new Vector2(-1, 0) * speed);
+            }
+            if (Keyboard.GetState().IsKeyDown(Keys.D))//move left
+            {
+                redghost.Move(new Vector2(1, 0) * speed);
+            }
+            if (Keyboard.GetState().IsKeyDown(Keys.W))//move up
+            {
+                redghost.Move(new Vector2(0, -1) * speed);
+            }
+            if (Keyboard.GetState().IsKeyDown(Keys.S))//move down
+            {
+                redghost.Move(new Vector2(0, 1) * speed);
+            }
+            if (!GraphicsDevice.Viewport.Bounds.Contains(redghost.BoundingRect))
+            {
+                redghost.Move(previousPos - redghost.Position);
+            }
+            if (blueghost.inCollision(redghost))
+            {
+                colMsg = "We're in collision.";
+            }
+            else
+            {
+                colMsg = "We're not in collision.";
+            }
             base.Update(gameTime);
         }
 
@@ -74,9 +113,17 @@ namespace Week4Lab1
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
+            spriteBatch.Begin();
 
-            // TODO: Add your drawing code here
+            background.draw(spriteBatch);
+            redghost.draw(spriteBatch);
+            blueghost.draw(spriteBatch);
 
+            redghost.displayMessage(colMsg, spriteBatch, msgFont, Color.PaleVioletRed);
+
+            spriteBatch.DrawString(msgFont, colMsg, new Vector2(blueghost.Position.X + 40f, blueghost.Position.Y + 10f), Color.AntiqueWhite);
+
+            spriteBatch.End();
             base.Draw(gameTime);
         }
     }
