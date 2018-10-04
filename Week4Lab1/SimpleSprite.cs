@@ -49,7 +49,7 @@ namespace Sprites
             if (Visible)
             {
                 Vector2 textSize = font.MeasureString(msg);
-                Vector2 msgPos = new Vector2((this.Position.X + this.Width / 2) - textSize.X / 2, this.Position.Y - textSize.Y + 5));
+                Vector2 msgPos = new Vector2((this.Position.X + this.Width / 2) - textSize.X / 2, this.Position.Y - textSize.Y + 5);
                 sB.DrawString(font, msg, msgPos, colour);
             }
         }
