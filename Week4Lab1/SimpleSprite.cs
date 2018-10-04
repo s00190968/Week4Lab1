@@ -11,6 +11,7 @@ namespace Sprites
     {
         public Texture2D Image;
         public Vector2 Position;
+        public Vector2 Velocity;
         public Rectangle BoundingRect;
         public bool Visible = true;
         public float Width, Height;

@@ -56,6 +56,7 @@
   <ItemGroup>
     <Content Include="Content\Sprites\blueghost.png" />
     <Content Include="Content\Sprites\download.jpg" />
+    <Content Include="Content\Sprites\ground.png" />
     <Content Include="Content\Sprites\pac.png" />
     <Content Include="Content\Sprites\redghost.png" />
     <Content Include="Icon.ico" />

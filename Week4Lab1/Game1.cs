@@ -11,10 +11,17 @@ namespace Week4Lab1
     public class Game1 : Game
     {
         GraphicsDeviceManager graphics;
+        Viewport mainViewport;
+        Viewport mapViewport;
         SpriteBatch spriteBatch;
-        SimpleSprite background, redghost, blueghost, pac;
+        SimpleSprite background, redghost, blueghost, ground;
         string colMsg = "";
         SpriteFont msgFont;
+        float jumpforce;
+
+        readonly Vector2 gravity = new Vector2(0, 9.81f);
+
+        float viewHeight, viewWidth;
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -30,7 +37,8 @@ namespace Week4Lab1
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-
+            viewHeight = GraphicsDevice.Viewport.Height;
+            viewWidth = GraphicsDevice.Viewport.Width;
             base.Initialize();
         }
 
@@ -51,7 +59,16 @@ namespace Week4Lab1
             Texture2D rGhost = Content.Load<Texture2D>(@"Sprites/redghost");
             redghost = new SimpleSprite(rGhost, Vector2.Zero);
             Texture2D bGhost = Content.Load<Texture2D>(@"Sprites/blueghost");
-            blueghost = new SimpleSprite(bGhost, Vector2.Zero);
+            blueghost = new SimpleSprite(bGhost, new Vector2(viewWidth / 2 - bGhost.Width / 2, viewHeight - bGhost.Height - 30f));
+            Texture2D gr = Content.Load<Texture2D>(@"Sprites/ground");
+            ground = new SimpleSprite(gr, new Vector2(viewWidth / 2 - gr.Width / 2, viewHeight - gr.Height));
+
+            //viewports
+            mainViewport = GraphicsDevice.Viewport;
+            GraphicsDevice.Viewport = mainViewport;
+            mapViewport.Bounds = new Rectangle(0, 0, mainViewport.Width / 12, mainViewport.Height / 12);
+            mapViewport.X = 0;
+            mapViewport.Y = 0;
         }
 
         /// <summary>
@@ -70,11 +87,13 @@ namespace Week4Lab1
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
+            float time = (float)gameTime.ElapsedGameTime.TotalSeconds;
             float speed = 5f;
             Vector2 previousPos = redghost.Position;
+            Vector2 bluePrevPos = blueghost.Position;
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
-
+            //redghost
             if (Keyboard.GetState().IsKeyDown(Keys.A))//move right
             {
                 redghost.Move(new Vector2(-1, 0) * speed);
@@ -95,9 +114,35 @@ namespace Week4Lab1
             {
                 redghost.Move(previousPos - redghost.Position);
             }
-            if (blueghost.inCollision(redghost))
+            //blueghost
+            if (Keyboard.GetState().IsKeyDown(Keys.Right))//move right
             {
-                colMsg = "We're in collision.";
+                blueghost.Move(new Vector2(-1, 0) * speed);
+            }
+            if (Keyboard.GetState().IsKeyDown(Keys.Left))//move left
+            {
+                blueghost.Move(new Vector2(1, 0) * speed);
+            }
+            if (Keyboard.GetState().IsKeyDown(Keys.Space))//jump up
+            {
+                jumpforce = 5f;
+                blueghost.Velocity.Y =- jumpforce;
+            }
+            if (!GraphicsDevice.Viewport.Bounds.Contains(blueghost.BoundingRect))
+            {
+                blueghost.Move(bluePrevPos - blueghost.Position);
+            }
+            blueghost.Velocity += gravity * time;
+            blueghost.Position += blueghost.Velocity * time;
+
+            //collisions
+            if (ground.BoundingRect.Intersects(blueghost.BoundingRect))//blue shouldn't fall through the ground
+            {
+                blueghost.Velocity.Y = 0;
+            }
+            if (blueghost.inCollision(ground))
+            {
+                colMsg = "I'm touching the ground.";
             }
             else
             {
@@ -112,18 +157,34 @@ namespace Week4Lab1
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
+            // main
+            GraphicsDevice.Viewport = mainViewport;
             GraphicsDevice.Clear(Color.CornflowerBlue);
             spriteBatch.Begin();
 
             background.draw(spriteBatch);
             redghost.draw(spriteBatch);
             blueghost.draw(spriteBatch);
+            ground.draw(spriteBatch);
 
             redghost.displayMessage(colMsg, spriteBatch, msgFont, Color.PaleVioletRed);
-
             spriteBatch.DrawString(msgFont, colMsg, new Vector2(blueghost.Position.X + 40f, blueghost.Position.Y + 10f), Color.AntiqueWhite);
 
             spriteBatch.End();
+
+            //map
+            GraphicsDevice.Viewport = mainViewport;
+
+            spriteBatch.Begin();
+
+            background.draw(spriteBatch);
+            redghost.draw(spriteBatch);
+            blueghost.draw(spriteBatch);
+            ground.draw(spriteBatch);
+
+
+            spriteBatch.End();
+
             base.Draw(gameTime);
         }
     }
