@@ -66,7 +66,7 @@ namespace Week4Lab1
             //viewports
             mainViewport = GraphicsDevice.Viewport;
             GraphicsDevice.Viewport = mainViewport;
-            mapViewport.Bounds = new Rectangle(0, 0, mainViewport.Width / 12, mainViewport.Height / 12);
+            mapViewport.Bounds = new Rectangle(0, 0, mainViewport.Width / 10, mainViewport.Height / 10);
             mapViewport.X = 0;
             mapViewport.Y = 0;
         }
@@ -117,28 +117,28 @@ namespace Week4Lab1
             //blueghost
             if (Keyboard.GetState().IsKeyDown(Keys.Right))//move right
             {
-                blueghost.Move(new Vector2(-1, 0) * speed);
+                blueghost.Move(new Vector2(1, 0) * speed);
             }
             if (Keyboard.GetState().IsKeyDown(Keys.Left))//move left
             {
-                blueghost.Move(new Vector2(1, 0) * speed);
+                blueghost.Move(new Vector2(-1, 0) * speed);
             }
             if (Keyboard.GetState().IsKeyDown(Keys.Space))//jump up
             {
                 jumpforce = 5f;
-                blueghost.Velocity.Y =- jumpforce;
+                blueghost.Move(new Vector2(blueghost.Velocity.X, blueghost.Velocity.Y = -jumpforce));
             }
             if (!GraphicsDevice.Viewport.Bounds.Contains(blueghost.BoundingRect))
             {
                 blueghost.Move(bluePrevPos - blueghost.Position);
             }
-            blueghost.Velocity += gravity * time;
-            blueghost.Position += blueghost.Velocity * time;
+            blueghost.Move(gravity * time);
+            blueghost.Move(blueghost.Velocity * time);
 
             //collisions
             if (ground.BoundingRect.Intersects(blueghost.BoundingRect))//blue shouldn't fall through the ground
             {
-                blueghost.Velocity.Y = 0;
+                blueghost.Move(new Vector2(blueghost.Velocity.X, 0));
             }
             if (blueghost.inCollision(ground))
             {
@@ -168,6 +168,7 @@ namespace Week4Lab1
             ground.draw(spriteBatch);
 
             redghost.displayMessage(colMsg, spriteBatch, msgFont, Color.PaleVioletRed);
+            blueghost.displayMessage(colMsg, spriteBatch, msgFont, Color.BlueViolet);
             spriteBatch.DrawString(msgFont, colMsg, new Vector2(blueghost.Position.X + 40f, blueghost.Position.Y + 10f), Color.AntiqueWhite);
 
             spriteBatch.End();
